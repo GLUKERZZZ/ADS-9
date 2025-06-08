@@ -6,26 +6,32 @@
 #include <memory>
 
 class PMTree {
-private:
+ private:
   struct Node {
+    explicit Node(char val) : value(val) {}
     char value;
     std::vector<std::shared_ptr<Node>> children;
-
-    Node(char val) : value(val) {}
   };
 
   std::shared_ptr<Node> root;
   int total_permutations;
 
-  void buildTree(std::shared_ptr<Node> parent, const std::vector<char>& remaining);
-  void getAllPermsHelper(std::shared_ptr<Node> node, std::vector<char>& current,
-    std::vector<std::vector<char>>& result) const;
-  void getPermHelper1(std::shared_ptr<Node> node, std::vector<char>& current,
-    int& counter, int target, std::vector<char>& result) const;
-  bool getPermHelper2(std::shared_ptr<Node> node, std::vector<char>& current,
-    int& remaining, std::vector<char>& result) const;
+  void buildTree(std::shared_ptr<Node> parent,
+                 const std::vector<char>& remaining);
+  void getAllPermsHelper(std::shared_ptr<Node> node,
+                         std::vector<char>& current,
+                         std::vector<std::vector<char>>& result) const;
+  void getPermHelper1(std::shared_ptr<Node> node,
+                      std::vector<char>& current,
+                      int& counter,
+                      int target,
+                      std::vector<char>& result) const;
+  bool getPermHelper2(std::shared_ptr<Node> node,
+                      std::vector<char>& current,
+                      int& remaining,
+                      std::vector<char>& result) const;
 
-public:
+ public:
   explicit PMTree(const std::vector<char>& elements);
 
   std::vector<std::vector<char>> getAllPerms() const;
