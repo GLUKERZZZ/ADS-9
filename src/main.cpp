@@ -135,7 +135,8 @@ void performanceExperiment() {
       }
       end = std::chrono::high_resolution_clock::now();
       perm1_time = std::chrono::duration_cast<
-          std::chrono::microseconds>(end - start).count() / random_nums.size();
+          std::chrono::microseconds>(end - start).count() /
+          random_nums.size();
     }
 
     int64_t perm2_time = 0;
@@ -146,7 +147,8 @@ void performanceExperiment() {
       }
       end = std::chrono::high_resolution_clock::now();
       perm2_time = std::chrono::duration_cast<
-          std::chrono::microseconds>(end - start).count() / random_nums.size();
+          std::chrono::microseconds>(end - start).count() /
+          random_nums.size();
     }
 
     std::cout << n << "\t" << all_perms_time 
@@ -159,7 +161,8 @@ void performanceExperiment() {
     perm2_times.push_back(perm2_time);
   }
 
-  savePerformanceDataToFile(n_values, all_perms_times, perm1_times, perm2_times);
+  savePerformanceDataToFile(n_values, all_perms_times,
+                          perm1_times, perm2_times);
   generatePlot();
 }
 
