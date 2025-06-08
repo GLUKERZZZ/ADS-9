@@ -53,8 +53,7 @@ void PMTree::getAllPermsHelper(std::shared_ptr<Node> node,
   }
   if (node->children.empty()) {
     result.push_back(current);
-  }
-  else {
+  } else {
     for (const auto& child : node->children) {
       getAllPermsHelper(child, current, result);
     }
@@ -86,8 +85,7 @@ void PMTree::getPermHelper1(std::shared_ptr<Node> node,
     if (counter == target) {
       result = current;
     }
-  }
-  else {
+  } else {
     for (const auto& child : node->children) {
       if (result.empty()) {
         getPermHelper1(child, current, counter, target, result);
