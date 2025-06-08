@@ -151,8 +151,8 @@ void performanceExperiment() {
           random_nums.size();
     }
 
-    std::cout << n << "\t" << all_perms_time 
-              << "\t\t\t" << perm1_time 
+    std::cout << n << "\t" << all_perms_time
+              << "\t\t\t" << perm1_time
               << "\t\t\t" << perm2_time << "\n";
 
     n_values.push_back(n);
