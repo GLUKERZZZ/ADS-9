@@ -5,20 +5,23 @@
 #include <random>
 #include <fstream>
 #include <cstdint>
+#include <algorithm>
+#include <cstdlib>
 #include "tree.h"
 
-void savePerformanceDataToFile(const std::vector<int>& n_values,
-  const std::vector<int64_t>& all_perms_times,
-  const std::vector<int64_t>& perm1_times,
-  const std::vector<int64_t>& perm2_times) {
+void savePerformanceDataToFile(
+    const std::vector<int>& n_values,
+    const std::vector<int64_t>& all_perms_times,
+    const std::vector<int64_t>& perm1_times,
+    const std::vector<int64_t>& perm2_times) {
   std::ofstream data_file("performance_data.dat");
 
   data_file << "# n\tgetAllPerms\tgetPerm1\tgetPerm2\n";
   for (size_t i = 0; i < n_values.size(); ++i) {
     data_file << n_values[i] << "\t"
-      << all_perms_times[i] << "\t"
-      << perm1_times[i] << "\t"
-      << perm2_times[i] << "\n";
+              << all_perms_times[i] << "\t"
+              << perm1_times[i] << "\t"
+              << perm2_times[i] << "\n";
   }
   data_file.close();
 }
@@ -34,14 +37,16 @@ void generatePlot() {
   plot_file << "set grid\n";
   plot_file << "set key left top\n";
   plot_file << "plot 'performance_data.dat' using 1:2 "
-    << "with linespoints title 'getAllPerms', \\\n";
+            << "with linespoints title 'getAllPerms', \\\n";
   plot_file << "     'performance_data.dat' using 1:3 "
-    << "with linespoints title 'getPerm1', \\\n";
+            << "with linespoints title 'getPerm1', \\\n";
   plot_file << "     'performance_data.dat' using 1:4 "
-    << "with linespoints title 'getPerm2'\n";
+            << "with linespoints title 'getPerm2'\n";
 
   plot_file.close();
-  system("gnuplot plot_script.gp");
+  if (system("gnuplot plot_script.gp") != 0) {
+    std::cerr << "Failed to generate plot\n";
+  }
   std::cout << "Plot saved as 'performance_plot.png'\n";
 }
 
@@ -52,7 +57,7 @@ void printPermutations(const std::vector<char>& elements) {
   std::cout << "All permutations for [";
   for (size_t i = 0; i < elements.size(); ++i) {
     std::cout << elements[i];
-    if (i != elements.size() - 1) std::cout << " ";
+    if (i != elements.size()-1) std::cout << " ";
   }
   std::cout << "]:\n";
 
@@ -69,7 +74,7 @@ void testSpecificPermutations(const std::vector<char>& elements) {
   std::cout << "Testing specific permutations for [";
   for (size_t i = 0; i < elements.size(); ++i) {
     std::cout << elements[i];
-    if (i != elements.size() - 1) std::cout << " ";
+    if (i != elements.size()-1) std::cout << " ";
   }
   std::cout << "]:\n";
 
@@ -108,17 +113,19 @@ void performanceExperiment() {
     PMTree tree(elements);
     int total_perms = tree.getTotalPermutations();
 
-    std::uniform_int_distribution<> distr(1, total_perms);
     std::vector<int> random_nums;
-    for (int i = 0; i < 3 && total_perms > 0; ++i) {
-      random_nums.push_back(distr(gen));
+    if (total_perms > 0) {
+      std::uniform_int_distribution<> distr(1, total_perms);
+      for (int i = 0; i < 3; ++i) {
+        random_nums.push_back(distr(gen));
+      }
     }
 
     auto start = std::chrono::high_resolution_clock::now();
     auto all_perms = getAllPerms(tree);
     auto end = std::chrono::high_resolution_clock::now();
-    auto all_perms_time =
-      std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    auto all_perms_time = std::chrono::duration_cast<
+        std::chrono::microseconds>(end - start).count();
 
     int64_t perm1_time = 0;
     if (!random_nums.empty()) {
@@ -127,9 +134,8 @@ void performanceExperiment() {
         getPerm1(tree, num);
       }
       end = std::chrono::high_resolution_clock::now();
-      perm1_time =
-        std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-        / random_nums.size();
+      perm1_time = std::chrono::duration_cast<
+          std::chrono::microseconds>(end - start).count() / random_nums.size();
     }
 
     int64_t perm2_time = 0;
@@ -139,14 +145,13 @@ void performanceExperiment() {
         getPerm2(tree, num);
       }
       end = std::chrono::high_resolution_clock::now();
-      perm2_time =
-        std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-        / random_nums.size();
+      perm2_time = std::chrono::duration_cast<
+          std::chrono::microseconds>(end - start).count() / random_nums.size();
     }
 
-    std::cout << n << "\t" << all_perms_time
-      << "\t\t\t" << perm1_time
-      << "\t\t\t" << perm2_time << "\n";
+    std::cout << n << "\t" << all_perms_time 
+              << "\t\t\t" << perm1_time 
+              << "\t\t\t" << perm2_time << "\n";
 
     n_values.push_back(n);
     all_perms_times.push_back(all_perms_time);
@@ -159,8 +164,8 @@ void performanceExperiment() {
 }
 
 int main() {
-  printPermutations({ '1', '2', '3' });
-  testSpecificPermutations({ '1', '2', '3' });
+  printPermutations({'1', '2', '3'});
+  testSpecificPermutations({'1', '2', '3'});
   performanceExperiment();
   return 0;
 }
