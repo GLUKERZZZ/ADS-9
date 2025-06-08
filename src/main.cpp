@@ -7,6 +7,44 @@
 #include <cstdint>
 #include "tree.h"
 
+void savePerformanceDataToFile(const std::vector<int>& n_values,
+  const std::vector<int64_t>& all_perms_times,
+  const std::vector<int64_t>& perm1_times,
+  const std::vector<int64_t>& perm2_times) {
+  std::ofstream data_file("performance_data.dat");
+
+  data_file << "# n\tgetAllPerms\tgetPerm1\tgetPerm2\n";
+  for (size_t i = 0; i < n_values.size(); ++i) {
+    data_file << n_values[i] << "\t"
+      << all_perms_times[i] << "\t"
+      << perm1_times[i] << "\t"
+      << perm2_times[i] << "\n";
+  }
+  data_file.close();
+}
+
+void generatePlot() {
+  std::ofstream plot_file("plot_script.gp");
+
+  plot_file << "set terminal pngcairo enhanced font 'Verdana,10'\n";
+  plot_file << "set output 'performance_plot.png'\n";
+  plot_file << "set title 'Permutation Generation Performance'\n";
+  plot_file << "set xlabel 'Number of elements (n)'\n";
+  plot_file << "set ylabel 'Time (microseconds)'\n";
+  plot_file << "set grid\n";
+  plot_file << "set key left top\n";
+  plot_file << "plot 'performance_data.dat' using 1:2 "
+    << "with linespoints title 'getAllPerms', \\\n";
+  plot_file << "     'performance_data.dat' using 1:3 "
+    << "with linespoints title 'getPerm1', \\\n";
+  plot_file << "     'performance_data.dat' using 1:4 "
+    << "with linespoints title 'getPerm2'\n";
+
+  plot_file.close();
+  system("gnuplot plot_script.gp");
+  std::cout << "Plot saved as 'performance_plot.png'\n";
+}
+
 void printPermutations(const std::vector<char>& elements) {
   PMTree tree(elements);
   auto perms = getAllPerms(tree);
@@ -115,6 +153,10 @@ void performanceExperiment() {
     perm1_times.push_back(perm1_time);
     perm2_times.push_back(perm2_time);
   }
+
+  savePerformanceDataToFile(n_values, all_perms_times, perm1_times, perm2_times);
+  generatePlot();
+}
 
 int main() {
   printPermutations({ '1', '2', '3' });
