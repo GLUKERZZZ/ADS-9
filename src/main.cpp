@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include <fstream>
+#include <cstdint>
 #include "tree.h"
 
 void printPermutations(const std::vector<char>& elements) {
@@ -11,7 +12,10 @@ void printPermutations(const std::vector<char>& elements) {
   auto perms = getAllPerms(tree);
 
   std::cout << "All permutations for [";
-  for (char c : elements) std::cout << c << " ";
+  for (size_t i = 0; i < elements.size(); ++i) {
+    std::cout << elements[i];
+    if (i != elements.size() - 1) std::cout << " ";
+  }
   std::cout << "]:\n";
 
   for (const auto& perm : perms) {
@@ -25,10 +29,14 @@ void testSpecificPermutations(const std::vector<char>& elements) {
   PMTree tree(elements);
 
   std::cout << "Testing specific permutations for [";
-  for (char c : elements) std::cout << c << " ";
+  for (size_t i = 0; i < elements.size(); ++i) {
+    std::cout << elements[i];
+    if (i != elements.size() - 1) std::cout << " ";
+  }
   std::cout << "]:\n";
 
-  for (int i = 1; i <= 6; ++i) {
+  int total_perm = tree.getTotalPermutations();
+  for (int i = 1; i <= std::min(6, total_perm); ++i) {
     auto perm1 = getPerm1(tree, i);
     auto perm2 = getPerm2(tree, i);
 
@@ -50,9 +58,9 @@ void performanceExperiment() {
   std::mt19937 gen(rd());
 
   std::vector<int> n_values;
-  std::vector<long> all_perms_times;
-  std::vector<long> perm1_times;
-  std::vector<long> perm2_times;
+  std::vector<int64_t> all_perms_times;
+  std::vector<int64_t> perm1_times;
+  std::vector<int64_t> perm2_times;
 
   for (int n = 1; n <= 10; ++n) {
     std::vector<char> elements;
@@ -71,23 +79,42 @@ void performanceExperiment() {
     auto start = std::chrono::high_resolution_clock::now();
     auto all_perms = getAllPerms(tree);
     auto end = std::chrono::high_resolution_clock::now();
-    auto all_perms_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    start = std::chrono::high_resolution_clock::now();
+    auto all_perms_time =
+      std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-    for (int num : random_nums) {
-      getPerm1(tree, num);
+    int64_t perm1_time = 0;
+    if (!random_nums.empty()) {
+      start = std::chrono::high_resolution_clock::now();
+      for (int num : random_nums) {
+        getPerm1(tree, num);
+      }
+      end = std::chrono::high_resolution_clock::now();
+      perm1_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+        / random_nums.size();
     }
-    end = std::chrono::high_resolution_clock::now();
-    auto perm1_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 3;
 
-    start = std::chrono::high_resolution_clock::now();
-    for (int num : random_nums) {
-      getPerm2(tree, num);
+    int64_t perm2_time = 0;
+    if (!random_nums.empty()) {
+      start = std::chrono::high_resolution_clock::now();
+      for (int num : random_nums) {
+        getPerm2(tree, num);
+      }
+      end = std::chrono::high_resolution_clock::now();
+      perm2_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+        / random_nums.size();
     }
-    end = std::chrono::high_resolution_clock::now();
-    auto perm2_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 3;
 
-    std::cout << n << "\t" << all_perms_time << "\t\t\t" << perm1_time << "\t\t\t" << perm2_time << "\n";
+    std::cout << n << "\t" << all_perms_time
+      << "\t\t\t" << perm1_time
+      << "\t\t\t" << perm2_time << "\n";
+
+    n_values.push_back(n);
+    all_perms_times.push_back(all_perms_time);
+    perm1_times.push_back(perm1_time);
+    perm2_times.push_back(perm2_time);
+  }
 
 int main() {
   printPermutations({ '1', '2', '3' });
